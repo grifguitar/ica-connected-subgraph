@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
+import csv
 
 from sklearn.decomposition import FastICA, PCA
 
@@ -57,6 +58,24 @@ def signals_gen():
     return S
 
 
+def data_read():
+    # Считывание входных данных
+    x = list(list())
+    y = list()
+    with open('../src/main/java/examples/test_small_025/test_small_025.mtx', 'r') as csvfile:
+        plots = csv.reader(csvfile, delimiter='\t')
+        for row in plots:
+            y.append(row[0])
+            x.append(row[1:])
+
+    X = np.array(x).astype(float)
+    Y = np.array(y).astype(str)
+    np.savetxt('out1.txt', X, fmt='%0.8f')
+    np.savetxt('out2.txt', Y, fmt='%s')
+
+    return X
+
+
 def solve():
     # #############################################################################
 
@@ -83,19 +102,36 @@ def solve():
     X += X_EPS
     array_print(M=X)
 
+    calculate_and_plot(X=X, n_components=3, S=S)
+
+
+def calculate_and_plot(X, n_components, S=None):
     # #############################################################################
 
     # Compute ICA
-    ica = FastICA(n_components=3)
-    S_ = ica.fit_transform(X)  # Reconstruct signals
-    A_ = ica.mixing_  # Get estimated mixing matrix
+    ica = FastICA(n_components=n_components)
 
-    # We can `prove` that the ICA model applies by reverting the unmixing.
-    # assert np.allclose(X, np.dot(S_, A_.T) + ica.mean_)
+    # Reconstruct signals
+    S_ = ica.fit_transform(X)
+    if S is None:
+        S = S_
+    array_print(M=S_)
+
+    # Get estimated mixing matrix
+    A_ = ica.mixing_
+    A_ = A_.T
+
+    # Compute estimated observations matrix
+    X_ = np.matmul(S_, A_) + ica.mean_
+    array_print(M=X_)
+
+    # #############################################################################
 
     # For comparison, compute PCA
-    pca = PCA(n_components=3)
-    H = pca.fit_transform(X)  # Reconstruct signals based on orthogonal components
+    pca = PCA(n_components=n_components)
+
+    # Reconstruct signals based on orthogonal components
+    H = pca.fit_transform(X)
 
     # #############################################################################
     # Plot results
