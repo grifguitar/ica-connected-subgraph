@@ -49,3 +49,23 @@ Mixing matrix:
 #### Total result:
 
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_10.png)
+
+## Запуск 2
+
+#### Signals matrix (True, Reconstruct):
+
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_1.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_3.png)
+
+#### Observations matrix (True, Reconstruct):
+
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_2.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_4.png)
+
+#### Total results:
+
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_5.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_6.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_7.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_8.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_9.png)
