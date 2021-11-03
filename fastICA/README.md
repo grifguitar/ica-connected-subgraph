@@ -39,10 +39,12 @@ Mixing matrix:
 #### Reconstruct signals matrix:
 
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_8.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_4.png)
 
 #### Reconstruct observations matrix:
 
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_9.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_7.png)
 
 #### Total result:
 
