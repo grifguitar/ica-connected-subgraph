@@ -4,8 +4,13 @@ from scipy import signal
 
 from sklearn.decomposition import FastICA, PCA
 
+episode_num = 1
+img_cnt = 0
+
 
 def array_print(M, min_value=None, max_value=None):
+    global img_cnt
+    img_cnt += 1
     shape = np.array(M.shape)
     print(shape)
     plt.imshow(M, interpolation="nearest")
@@ -15,6 +20,7 @@ def array_print(M, min_value=None, max_value=None):
     plt.xlim(-1, shape[1])
     plt.ylim(-1, shape[0])
     plt.gca().set_aspect('auto', adjustable='box')
+    plt.savefig('images_{x}/frame_{y}.png'.format_map({'x': episode_num, 'y': img_cnt}))
     plt.show()
 
 
@@ -59,10 +65,12 @@ def solve():
 
     # Make a mixing matrix
     A = np.array([[1.0, 1.0, 1.0], [0.5, 2.0, 1.0], [1.5, 1.0, 2.0], [2.0, 1.0, 1.0]])
-    print(S.shape, A.T.shape)
+    A = A.T
+    np.savetxt('images_{x}/mixing_matrix.txt'.format_map({'x': episode_num}), A, fmt='%0.4f')
+    print(S.shape, A.shape)
 
     # Compute observations matrix
-    X = np.matmul(S, A.T)
+    X = np.matmul(S, A)
     print(X.shape)
     array_print(M=X)
 
@@ -110,6 +118,9 @@ def solve():
             plt.plot(sig, color=color)
 
     plt.tight_layout()
+    global img_cnt
+    img_cnt += 1
+    plt.savefig('images_{x}/frame_{y}.png'.format_map({'x': episode_num, 'y': img_cnt}))
     plt.show()
 
 
