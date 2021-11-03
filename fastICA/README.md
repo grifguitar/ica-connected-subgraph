@@ -9,25 +9,33 @@ Mixing matrix:
 ```
 
 Make a signals matrix:
+
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_1.png)
 
 Generate gaussian noise:
+
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_2.png)
 
 Add noise to signals matrix:
+
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_3.png)
 
 Standardize signals matrix:
+
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_4.png)
 
 Compute observations matrix:
+
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_5.png)
 
 Generate gaussian noise:
+
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_6.png)
 
 Add noise to observations matrix:
+
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_7.png)
 
 Total result:
+
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_8.png)
