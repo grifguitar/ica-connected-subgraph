@@ -62,7 +62,9 @@ Mixing matrix:
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_6.png)
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_7.png)
 
-#### Answer matrix (reaction threshold `|X| > 1`):
+#### Answer matrix:
+
+reaction threshold `|x| > 1`
 
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_8.png)
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_9.png)
