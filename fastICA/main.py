@@ -6,7 +6,7 @@ import csv
 from sklearn.decomposition import FastICA, PCA
 from sklearn.cluster import DBSCAN
 
-episode_num = 1
+episode_num = 2
 img_cnt = 0
 
 
@@ -278,4 +278,4 @@ def calculate_and_plot(X, n_components, S=None, w=None):
 
 
 if __name__ == '__main__':
-    solve()
+    solve2()
