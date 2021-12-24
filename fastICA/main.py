@@ -6,7 +6,7 @@ import csv
 from sklearn.decomposition import FastICA, PCA
 from sklearn.cluster import DBSCAN
 
-episode_num = 2
+episode_num = 1
 img_cnt = 0
 
 
@@ -64,10 +64,11 @@ def clustering(X):
     distance_matrix = 1 - np.corrcoef(X)
     # print(distance_matrix)
 
-    # test: dbscan = DBSCAN(eps=0.1, min_samples=2, metric='precomputed')
-    # solve: dbscan = DBSCAN(eps=0.0001, min_samples=10, metric='precomputed')
+    # test: DBSCAN(eps=0.1, min_samples=2, metric='precomputed')
+    # solve: DBSCAN(eps=0.0005, min_samples=5, metric='precomputed')
+    # prod: DBSCAN(eps=0.01, min_samples=3, metric='precomputed')
 
-    dbscan = DBSCAN(eps=0.01, min_samples=3, metric='precomputed')
+    dbscan = DBSCAN(eps=0.0005, min_samples=5, metric='precomputed')
     labels = dbscan.fit_predict(distance_matrix)
 
     # print(labels)
@@ -278,4 +279,4 @@ def calculate_and_plot(X, n_components, S=None, w=None):
 
 
 if __name__ == '__main__':
-    solve2()
+    solve()
