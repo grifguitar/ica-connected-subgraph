@@ -22,8 +22,8 @@ def array_print(M, min_value=None, max_value=None, name=None):
     plt.xlim(-1, shape[1])
     plt.ylim(-1, shape[0])
     plt.gca().set_aspect('auto', adjustable='box')
-    plt.savefig('images_{x}/frame_{y}.png'.format_map({'x': episode_num, 'y': img_cnt}))
     plt.title(name)
+    plt.savefig('images_{x}/frame_{y}.png'.format_map({'x': episode_num, 'y': img_cnt}))
     plt.show()
 
 
@@ -58,34 +58,6 @@ def signals_gen():
     array_print(M=S, min_value=-1.5, max_value=1.5, name="standardized noisy signal matrix")
 
     return S
-
-
-def data_read(filename, out_x, out_y):
-    # Считывание входных данных
-    x = list(list())
-    y = list()
-    with open(filename, 'r') as csvfile:
-        plots = csv.reader(csvfile, delimiter='\t')
-        for row in plots:
-            y.append(row[0])
-            x.append(row[1:])
-
-    X = np.array(x).astype(float)
-    Y = np.array(y).astype(str)
-    np.savetxt(out_x, X, fmt='%0.8f')
-    np.savetxt(out_y, Y, fmt='%s')
-
-    return X
-
-
-def solve2():
-    S = data_read('input_data/test_small.ans_025_cont', 'out1s.txt', 'out2s.txt')
-    array_print(M=S)
-
-    X = data_read('input_data/test_small_025.mtx', 'out1.txt', 'out2.txt')
-    array_print(M=X)
-
-    calculate_and_plot(X=X, n_components=4, S=S)
 
 
 def clustering(X):
@@ -159,6 +131,34 @@ def test():
     print(xarr1)
 
     array_print(M=xarr2, min_value=-3, max_value=3, name="random_sort")
+
+
+def data_read(filename, out_x, out_y):
+    # Считывание входных данных
+    x = list(list())
+    y = list()
+    with open(filename, 'r') as csvfile:
+        plots = csv.reader(csvfile, delimiter='\t')
+        for row in plots:
+            y.append(row[0])
+            x.append(row[1:])
+
+    X = np.array(x).astype(float)
+    Y = np.array(y).astype(str)
+    np.savetxt(out_x, X, fmt='%0.8f')
+    np.savetxt(out_y, Y, fmt='%s')
+
+    return X
+
+
+def solve2():
+    S = data_read('input_data/test_small.ans_025_cont', 'out1s.txt', 'out2s.txt')
+    array_print(M=S, name="true signal matrix")
+
+    X = data_read('input_data/test_small_025.mtx', 'out1.txt', 'out2.txt')
+    array_print(M=X, name="true observation matrix")
+
+    calculate_and_plot(X=X, n_components=4, S=S)
 
 
 def solve():
