@@ -168,9 +168,6 @@ def solve():
     # Get signals matrix
     S = signals_gen()
 
-    S1, S2 = transform(S)
-    array_print(M=S2, min_value=-1.5, max_value=1.5, name="clustered standardized noisy signal matrix")
-
     # Make a mixing matrix
     A = np.array([[1.0, 1.0, 1.0], [0.5, 2.0, 1.0], [1.5, 1.0, 2.0], [2.0, 1.0, 1.0]])
     A = A.T

@@ -24,40 +24,36 @@ Mixing matrix:
 
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_4.png)
 
-#### Clustered signals matrix:
+#### Compute observations matrix:
 
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_5.png)
 
-#### Compute observations matrix:
+#### Generate gaussian noise:
 
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_6.png)
 
-#### Generate gaussian noise:
+#### Add noise to observations matrix:
 
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_7.png)
 
-#### Add noise to observations matrix:
-
-![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_8.png)
-
 #### Reconstruct signals matrix:
 
-![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_9.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_8.png)
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_4.png)
 
 #### Clustered reconstruct signals matrix:
 
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_9.png)
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_10.png)
-![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_11.png)
 
 #### Reconstruct observations matrix:
 
-![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_12.png)
-![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_8.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_11.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_7.png)
 
 #### Total result:
 
-![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_13.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_1/frame_12.png)
 
 ## Запуск 2
 
