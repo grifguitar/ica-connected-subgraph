@@ -64,5 +64,5 @@ Mixing matrix:
 
 #### Clustered signal matrix:
 
-![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_8.png)
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_9.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_8.png)
