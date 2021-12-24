@@ -5,6 +5,7 @@ import csv
 
 from sklearn.decomposition import FastICA, PCA
 from sklearn.cluster import DBSCAN
+from sklearn.metrics import roc_curve, auc
 
 episode_num = 2
 img_cnt = 0
@@ -194,6 +195,33 @@ def solve2():
     calculate_and_plot(X=X, n_components=4, S=S, w=True, ANS=ANS)
 
 
+def roc(ans, predict, i, j):
+    global img_cnt
+    img_cnt += 1
+
+    fpr, tpr, _ = roc_curve(y_true=ans, y_score=predict)
+    roc_auc = auc(fpr, tpr)
+
+    plt.figure()
+    lw = 2
+    plt.plot(
+        fpr,
+        tpr,
+        color="darkorange",
+        lw=lw,
+        label="ROC curve (area = %0.2f)" % roc_auc,
+    )
+    plt.plot([0, 1], [0, 1], color="navy", lw=lw, linestyle="--")
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("ans: " + str(i) + "; predict: " + str(j))
+    plt.legend(loc="lower right")
+    plt.savefig('images_{x}/frame_{y}.png'.format_map({'x': episode_num, 'y': img_cnt}))
+    plt.show()
+
+
 def calculate_and_plot(X, n_components, S=None, w=None, ANS=None):
     # #############################################################################
 
@@ -228,15 +256,25 @@ def calculate_and_plot(X, n_components, S=None, w=None, ANS=None):
     save_txt(S2, "out_signal_true.txt")
 
     if ANS is not None:
-        EPS_ANS = 1
+        UP_EPS = 1
+        DOWN_EPS = -1
 
-        MY_ANS = np.array(abs(S_2) > EPS_ANS).astype(float)
+        MY_ANS1 = np.array(S_2 > UP_EPS).astype(float)
+        MY_ANS2 = np.array(S_2 < DOWN_EPS).astype(float)
+        MY_ANS = np.array((MY_ANS1 + MY_ANS2) >= 1).astype(float)
+
         array_print(M=MY_ANS, name="clustered reconstruct answer")
         save_txt(MY_ANS, "out_signal_reconstruct_ans.txt")
 
         ANS2 = transform_by_permutation(ANS, S_1)
         array_print(M=ANS2, name="clustered true answer")
         save_txt(ANS2, "out_signal_true_ans.txt")
+
+        for i in range(4):
+            for j in range(4):
+                ans = ANS2[:, i]
+                predict = S_2[:, j]
+                roc(ans, predict, i, j)
 
     # #############################################################################
 

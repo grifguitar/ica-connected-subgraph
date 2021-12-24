@@ -68,3 +68,27 @@ reaction threshold `|x| > 1`
 
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_8.png)
 ![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_9.png)
+
+#### ROC:
+
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_10.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_11.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_12.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_13.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_14.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_15.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_16.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_17.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_18.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_19.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_20.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_21.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_22.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_23.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_24.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_25.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_26.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_27.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_28.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_29.png)
+![image.png](https://github.com/grifguitar/ica-connected-subgraph/blob/main/fastICA/images_2/frame_30.png)
