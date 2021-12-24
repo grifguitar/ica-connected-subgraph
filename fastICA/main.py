@@ -6,7 +6,7 @@ import csv
 from sklearn.decomposition import FastICA, PCA
 from sklearn.cluster import DBSCAN
 
-episode_num = 2
+episode_num = 1
 img_cnt = 0
 
 
