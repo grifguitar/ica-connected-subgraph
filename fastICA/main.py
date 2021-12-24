@@ -12,9 +12,7 @@ img_cnt = 0
 
 def standardize(X):
     # Standardize signals matrix
-    st_dev = X.std(axis=0)
-    print("standard deviation:", st_dev)
-    X /= st_dev
+    X = (X - np.mean(X)) / np.std(X)
     return X
 
 
@@ -230,15 +228,15 @@ def calculate_and_plot(X, n_components, S=None, w=None, ANS=None):
     save_txt(S2, "out_signal_true.txt")
 
     if ANS is not None:
-        ANS2 = transform_by_permutation(ANS, S_1)
-        array_print(M=ANS2, name="clustered true answer")
-        save_txt(ANS2, "out_signal_true_ans.txt")
-
-        EPS_ANS = 0.5
+        EPS_ANS = 1
 
         MY_ANS = np.array(abs(S_2) > EPS_ANS).astype(float)
         array_print(M=MY_ANS, name="clustered reconstruct answer")
         save_txt(MY_ANS, "out_signal_reconstruct_ans.txt")
+
+        ANS2 = transform_by_permutation(ANS, S_1)
+        array_print(M=ANS2, name="clustered true answer")
+        save_txt(ANS2, "out_signal_true_ans.txt")
 
     # #############################################################################
 
