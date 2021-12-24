@@ -68,7 +68,7 @@ def clustering(X):
     # solve: DBSCAN(eps=0.0005, min_samples=5, metric='precomputed')
     # prod: DBSCAN(eps=0.02, min_samples=5, metric='precomputed')
 
-    dbscan = DBSCAN(eps=0.02, min_samples=5, metric='precomputed')
+    dbscan = DBSCAN(eps=0.02, min_samples=3, metric='precomputed')
     labels = dbscan.fit_predict(distance_matrix)
 
     # print(labels)
