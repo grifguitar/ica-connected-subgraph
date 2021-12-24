@@ -4,12 +4,13 @@ from scipy import signal
 import csv
 
 from sklearn.decomposition import FastICA, PCA
+from sklearn.cluster import DBSCAN
 
 episode_num = 2
 img_cnt = 0
 
 
-def array_print(M, min_value=None, max_value=None):
+def array_print(M, min_value=None, max_value=None, name=None):
     global img_cnt
     img_cnt += 1
     shape = np.array(M.shape)
@@ -22,6 +23,7 @@ def array_print(M, min_value=None, max_value=None):
     plt.ylim(-1, shape[0])
     plt.gca().set_aspect('auto', adjustable='box')
     plt.savefig('images_{x}/frame_{y}.png'.format_map({'x': episode_num, 'y': img_cnt}))
+    plt.title(name)
     plt.show()
 
 
@@ -38,22 +40,25 @@ def signals_gen():
 
     # Make a signals matrix
     S = np.c_[s1, s2, s3]
-    array_print(M=S, min_value=-1, max_value=1)
+    array_print(M=S, min_value=-1, max_value=1, name="signal matrix")
 
     # Generate gaussian noise
-    noise_cf = 0.2
+    noise_cf = 0.1
     EPS = noise_cf * np.random.normal(size=S.shape)
-    array_print(M=EPS, min_value=-noise_cf, max_value=noise_cf)
+    array_print(M=EPS, min_value=-noise_cf, max_value=noise_cf, name="gaussian noise matrix")
 
     # Add noise to signals matrix
     S += EPS
-    array_print(M=S, min_value=-1.5, max_value=1.5)
+    array_print(M=S, min_value=-1.5, max_value=1.5, name="noisy signal matrix")
 
     # Standardize signals matrix
     st_dev = S.std(axis=0)
     print("standard deviation:", st_dev)
     S /= st_dev
-    array_print(M=S, min_value=-1.5, max_value=1.5)
+    array_print(M=S, min_value=-1.5, max_value=1.5, name="standardized noisy signal matrix")
+
+    S1, S2 = transform(S)
+    array_print(M=S2, min_value=-1.5, max_value=1.5, name="clustered standardized noisy signal matrix")
 
     return S
 
@@ -77,13 +82,79 @@ def data_read(filename, out_x, out_y):
 
 
 def solve2():
-    S = data_read('../src/main/java/examples/test_small_025/test_small.ans_025_cont', 'out1s.txt', 'out2s.txt')
+    S = data_read('input_data/test_small.ans_025_cont', 'out1s.txt', 'out2s.txt')
     array_print(M=S)
 
-    X = data_read('../src/main/java/examples/test_small_025/test_small_025.mtx', 'out1.txt', 'out2.txt')
+    X = data_read('input_data/test_small_025.mtx', 'out1.txt', 'out2.txt')
     array_print(M=X)
 
     calculate_and_plot(X=X, n_components=4, S=S)
+
+
+def clustering(X):
+    distance_matrix = 1 - np.corrcoef(X)
+    # print(distance_matrix)
+
+    # test: dbscan = DBSCAN(eps=0.1, min_samples=2, metric='precomputed')
+    # solve: dbscan = DBSCAN(eps=0.0001, min_samples=10, metric='precomputed')
+
+    dbscan = DBSCAN(eps=0.0001, min_samples=10, metric='precomputed')
+    labels = dbscan.fit_predict(distance_matrix)
+
+    # print(labels)
+
+    return labels
+
+
+def transform(X):
+    to_label = dict()
+
+    labels = clustering(X)
+
+    for i in range(X.shape[0]):
+        to_label[np.array2string(X[i])] = labels[i]
+
+    X_ = list(enumerate(X))
+
+    X_.sort(key=lambda x: to_label[np.array2string(x[1])])
+
+    res = [list(t) for t in zip(*X_)]
+
+    return res[0], np.array(res[1])
+
+
+def test():
+    xarr = np.array([
+        [1.0, 2.0, 3.0],
+        [-3.0, 2.0, 1.0],
+        [1.0, 2.0, 3.0],
+        [-1.0, -2.0, -3.0],
+        [1.0, 2.0, 3.0],
+        [-1.0, -2.0, -3.0],
+        [-3.0, 2.0, 1.0],
+        [-1.0, -2.0, -3.0],
+        [1.0, 2.0, 3.0],
+        [-3.0, 2.0, 1.0],
+        [1.0, 2.0, 3.0],
+        [-1.0, -2.0, -3.0],
+        [-3.0, 2.0, 1.0],
+        [-1.0, -2.0, -3.0],
+        [1.0, 2.0, 3.0],
+        [-1.0, -2.0, -3.0],
+        [-3.0, 2.0, 1.0],
+        [-1.0, -2.0, -3.0],
+        [1.0, 2.0, 3.0],
+        [-1.0, -2.0, -3.0]
+    ])
+
+    array_print(M=xarr, min_value=-3, max_value=3, name="random")
+    print(xarr)
+
+    xarr1, xarr2 = transform(xarr)
+
+    print(xarr1)
+
+    array_print(M=xarr2, min_value=-3, max_value=3, name="random_sort")
 
 
 def solve():
@@ -101,16 +172,16 @@ def solve():
     # Compute observations matrix
     X = np.matmul(S, A)
     print(X.shape)
-    array_print(M=X)
+    array_print(M=X, name="computed observation matrix")
 
     # Generate gaussian noise
-    noise_cf = 0.2
+    noise_cf = 0.1
     X_EPS = noise_cf * np.random.normal(size=X.shape)
-    array_print(M=X_EPS, min_value=-noise_cf, max_value=noise_cf)
+    array_print(M=X_EPS, min_value=-noise_cf, max_value=noise_cf, name="gaussian noise matrix")
 
     # Add noise to observations matrix
     X += X_EPS
-    array_print(M=X)
+    array_print(M=X, name="noisy observation matrix")
 
     calculate_and_plot(X=X, n_components=3, S=S)
 
@@ -129,7 +200,10 @@ def calculate_and_plot(X, n_components, S=None, w=None):
         st_dev = S_.std(axis=0)
         print("standard deviation:", st_dev)
         S_ = np.array(S_ > st_dev[0]).astype(float)
-    array_print(M=S_)
+    array_print(M=S_, name="reconstructed signals")
+
+    S_1, S_2 = transform(S_)
+    array_print(M=S_2, name="clustered reconstructed signals")
 
     # Get estimated mixing matrix
     A_ = ica.mixing_
@@ -137,7 +211,7 @@ def calculate_and_plot(X, n_components, S=None, w=None):
 
     # Compute estimated observations matrix
     X_ = np.matmul(S_, A_) + ica.mean_
-    array_print(M=X_)
+    array_print(M=X_, name="reconstructed observation matrix")
 
     # #############################################################################
 
@@ -194,4 +268,4 @@ def calculate_and_plot(X, n_components, S=None, w=None):
 
 
 if __name__ == '__main__':
-    solve2()
+    solve()
