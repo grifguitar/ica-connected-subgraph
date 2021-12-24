@@ -57,9 +57,6 @@ def signals_gen():
     S /= st_dev
     array_print(M=S, min_value=-1.5, max_value=1.5, name="standardized noisy signal matrix")
 
-    S1, S2 = transform(S)
-    array_print(M=S2, min_value=-1.5, max_value=1.5, name="clustered standardized noisy signal matrix")
-
     return S
 
 
@@ -123,6 +120,13 @@ def transform(X):
     return res[0], np.array(res[1])
 
 
+def transform_by_permutation(X, permutation):
+    X_ = list()
+    for i in permutation:
+        X_.append(X[i])
+    return np.array(X_)
+
+
 def test():
     xarr = np.array([
         [1.0, 2.0, 3.0],
@@ -162,6 +166,9 @@ def solve():
 
     # Get signals matrix
     S = signals_gen()
+
+    S1, S2 = transform(S)
+    array_print(M=S2, min_value=-1.5, max_value=1.5, name="clustered standardized noisy signal matrix")
 
     # Make a mixing matrix
     A = np.array([[1.0, 1.0, 1.0], [0.5, 2.0, 1.0], [1.5, 1.0, 2.0], [2.0, 1.0, 1.0]])
@@ -204,6 +211,9 @@ def calculate_and_plot(X, n_components, S=None, w=None):
 
     S_1, S_2 = transform(S_)
     array_print(M=S_2, name="clustered reconstructed signals")
+
+    S2 = transform_by_permutation(S, S_1)
+    array_print(M=S2, name="clustered true signals")
 
     # Get estimated mixing matrix
     A_ = ica.mixing_
