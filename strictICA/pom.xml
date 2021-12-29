@@ -17,6 +17,7 @@
         <dependency>
             <groupId>com.ibm</groupId>
             <artifactId>cplex</artifactId>
+            <version>1.0</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/../cplex.jar</systemPath>
         </dependency>
