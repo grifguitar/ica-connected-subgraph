@@ -13,14 +13,4 @@
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.ibm</groupId>
-            <artifactId>cplex</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../cplex.jar</systemPath>
-        </dependency>
-    </dependencies>
-
 </project>
