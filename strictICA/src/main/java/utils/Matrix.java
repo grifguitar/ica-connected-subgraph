@@ -20,6 +20,7 @@ public class Matrix {
     }
 
     public void print() {
+        System.out.println("##### MATRIX PRINT: #####");
         for (double[] row : data) {
             for (double elem : row) {
                 System.out.print(elem + " ");

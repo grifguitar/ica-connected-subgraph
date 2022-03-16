@@ -6,43 +6,62 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args) {
-        BufferedReader in;
-        PrintWriter out = null;
+    private static final boolean WITH_NAME = false;
+    private static final String F_IN = "./input_data/simple_mtx.mtx";
+    private static final String F_OUT = "./output_data/output.txt";
+
+    private static Matrix read() {
         try {
-            in = new BufferedReader(new FileReader("./input_data/test_small_025.mtx", StandardCharsets.UTF_8));
-            out = new PrintWriter("./output_data/output.txt", StandardCharsets.UTF_8);
+            try (PrintWriter out = new PrintWriter(F_OUT, StandardCharsets.UTF_8)) {
+                try (BufferedReader in = new BufferedReader(new FileReader(F_IN, StandardCharsets.UTF_8))) {
 
-            List<List<Double>> matrixRaw = new ArrayList<>();
+                    List<List<Double>> matrixRaw = new ArrayList<>();
 
-            String line;
-            while ((line = in.readLine()) != null) {
-                String[] tokens = line.split("\\s");
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        String[] tokens = line.split("\\s");
 
-                out.println(tokens[0]);
+                        int startPos = 0;
 
-                List<Double> row = new ArrayList<>();
-                for (int i = 1; i < tokens.length; i++) {
-                    row.add(Double.parseDouble(tokens[i]));
+                        if (WITH_NAME) {
+                            out.println(tokens[0]);
+                            startPos = 1;
+                        }
+
+                        List<Double> row = new ArrayList<>();
+                        for (int i = startPos; i < tokens.length; i++) {
+                            row.add(Double.parseDouble(tokens[i]));
+                        }
+                        matrixRaw.add(row);
+                    }
+
+                    double[][] matrixData = new double[matrixRaw.size()][matrixRaw.get(0).size()];
+                    for (int i = 0; i < matrixRaw.size(); i++) {
+                        if (matrixRaw.get(i).size() != matrixRaw.get(0).size()) {
+                            throw new RuntimeException("wrong input");
+                        }
+                        for (int j = 0; j < matrixRaw.get(i).size(); j++) {
+                            matrixData[i][j] = matrixRaw.get(i).get(j);
+                        }
+                    }
+
+                    return new Matrix(matrixData);
                 }
-                matrixRaw.add(row);
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-            double[][] matrixData = new double[matrixRaw.size()][matrixRaw.get(0).size()];
-            for (int i = 0; i < matrixRaw.size(); i++) {
-                if (matrixRaw.get(i).size() != matrixRaw.get(0).size()) {
-                    throw new RuntimeException("wrong input");
-                }
-                for (int j = 0; j < matrixRaw.get(i).size(); j++) {
-                    matrixData[i][j] = matrixRaw.get(i).get(j);
-                }
-            }
+    public static void main(String[] args) {
+        try {
 
-            Matrix matrix = new Matrix(matrixData);
+            Matrix matrix = read();
 
             matrix.print();
 
             Solver solver = new Solver(matrix);
+
             if (solver.solve()) {
                 solver.printResults();
             } else {
@@ -50,11 +69,7 @@ public class Main {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (out != null) {
-                out.close();
-            }
+            throw new RuntimeException(e);
         }
     }
 }
