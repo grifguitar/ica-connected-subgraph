@@ -13,7 +13,7 @@ def solve():
     with open('simple_mtx.csv', 'r') as csvfile:
         plots = csv.reader(csvfile, delimiter='\t')
         for row in plots:
-            if random.randint(0, 20) == 0:
+            if random.randint(0, 0) == 0:
                 x.append(float(row[0]))
                 y.append(float(row[1]))
     len_x = len(x)
@@ -200,7 +200,7 @@ def l1pca(args):
     print('total_min: ', total_min)
     print('values: ', total_q)
 
-    new_q = total_q / 100
+    new_q = 1.5 * total_q / len(args)
     new_res = np.matmul(args, new_q)
     new_val = np.sum(np.absolute(new_res))
 

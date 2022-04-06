@@ -58,7 +58,7 @@ public class Main {
 
             Matrix matrix = read();
 
-            matrix.print();
+            System.out.println(matrix);
 
             Solver solver = new Solver(matrix);
 
