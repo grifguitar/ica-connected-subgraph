@@ -1,3 +1,7 @@
+import graph.Edge;
+import graph.Graph;
+import io.GraphIO;
+import io.MatrixIO;
 import utils.DataAnalysis;
 import utils.Matrix;
 import utils.Pair;
@@ -6,8 +10,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static io.MatrixIO.read;
-
 public class Main {
     static final String F_DEBUG = "./logs/debug.txt";
     static final String F_OUT = "./logs/out.txt";
@@ -15,11 +17,21 @@ public class Main {
     public static void main(String[] args) {
         try {
 
-            Pair<Matrix, Map<String, Integer>> pair = read("./input_data/test_small_025.mtx", true);
+            Map<Integer, String> rev_map = new HashMap<>();
+
+            Pair<Matrix, Map<String, Integer>> pair = MatrixIO.read("./input_data/test_small_025.mtx", true, rev_map);
+
             Matrix matrix = pair.first;
             Map<String, Integer> map = pair.second;
 
             matrix = whitening(matrix);
+
+            Graph graph = GraphIO.read("./input_data/test_small_025.graph", map);
+
+            System.out.println("$ size: " + graph.getEdges().size());
+            for (Edge edge : graph.getEdges()) {
+                System.out.println("$ " + rev_map.get(edge.getFrom().getNum()) + "\t" + rev_map.get(edge.getTo().getNum()));
+            }
 
             System.out.println(matrix);
 
@@ -30,7 +42,7 @@ public class Main {
                     solver.printResults(out);
                 }
 
-                Pair<Matrix, Map<String, Integer>> pair_ans = read("./input_data/test_small_025.ans", true);
+                Pair<Matrix, Map<String, Integer>> pair_ans = MatrixIO.read("./input_data/test_small_025.ans", true, null);
                 Matrix ans = pair_ans.first;
 
                 for (String s : map.keySet()) {

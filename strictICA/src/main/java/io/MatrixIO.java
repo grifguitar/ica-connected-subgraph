@@ -6,15 +6,12 @@ import utils.Pair;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.GraphIO.putAndGetId;
 
 public class MatrixIO {
-    public static Pair<Matrix, Map<String, Integer>> read(String f, boolean WITH_NAME) {
+    public static Pair<Matrix, Map<String, Integer>> read(String f, boolean WITH_NAME, Map<Integer, String> rev_map) {
         try {
             try (BufferedReader in = new BufferedReader(new FileReader(f, StandardCharsets.UTF_8))) {
 
@@ -29,7 +26,17 @@ public class MatrixIO {
                     int startPos = 0;
 
                     if (WITH_NAME) {
-                        putAndGetId(map, tokens[0]);
+                        int id = putAndGetId(map, tokens[0]);
+                        if (rev_map != null) {
+                            if (!rev_map.containsKey(id)) {
+                                rev_map.put(id, tokens[0]);
+                            } else {
+                                String name = rev_map.get(id);
+                                if (!Objects.equals(name, tokens[0])) {
+                                    throw new RuntimeException("some different name with equals id");
+                                }
+                            }
+                        }
                         startPos = 1;
                     }
 
