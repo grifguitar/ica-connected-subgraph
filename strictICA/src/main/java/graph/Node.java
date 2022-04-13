@@ -1,11 +1,6 @@
 package graph;
 
-public class Node {
-    private final int num;
-
-    public Node(int num) {
-        this.num = num;
-    }
+public record Node(int num) {
 
     public int getNum() {
         return num;

@@ -1,13 +1,6 @@
 package graph;
 
-public class Edge {
-    private final Node from;
-    private final Node to;
-
-    public Edge(Node from, Node to) {
-        this.from = from;
-        this.to = to;
-    }
+public record Edge(Node from, Node to) {
 
     public Node getFrom() {
         return from;

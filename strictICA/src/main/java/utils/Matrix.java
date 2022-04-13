@@ -2,6 +2,7 @@ package utils;
 
 import org.apache.commons.math3.linear.*;
 
+import java.io.PrintWriter;
 import java.util.*;
 
 public class Matrix {
@@ -59,7 +60,7 @@ public class Matrix {
         return new Matrix(MatrixUtils.inverse(toApacheMatrix()));
     }
 
-    public Pair<double[], double[][]> decomposition() {
+    public Pair<double[], double[][]> decomposition(PrintWriter err) {
         if (numRows() != numCols()) {
             throw new RuntimeException("expected square matrix!");
         }
@@ -90,6 +91,8 @@ public class Matrix {
             }
         }
 
+        err.println("# decompose debug:");
+
         double[][] eigenVectors = new double[numRows()][numRows()];
         for (int i = 0; i < eigenVectors.length; i++) {
             double[] eigenVector = eig.getEigenvector(i).toArray();
@@ -104,7 +107,8 @@ public class Matrix {
                 sum += eigenVector[j] * eigenVector[j];
             }
 
-            System.out.println("!!! " + sum + " : " + Arrays.toString(eigenVector));
+            err.println("!!! eigenVector sum : " + sum + " : " + Arrays.toString(eigenVector));
+
             if (Math.abs(sum - 1) > EPS) {
                 throw new RuntimeException("L2-norm of eigen vector must be 1!");
             }
@@ -114,44 +118,6 @@ public class Matrix {
 
         return new Pair<>(eigenValues, eigenVectors);
     }
-
-//    public Matrix getWhiteningMatrix() {
-//        if (numRows() != numCols()) {
-//            throw new RuntimeException("expected n * n matrix for decomposition");
-//        }
-//
-//        EigenDecomposition eig = new EigenDecomposition(toApacheMatrix());
-//
-//        if (eig.hasComplexEigenvalues()) {
-//            throw new RuntimeException("EigenDecomposition hasComplexEigenvalues");
-//        }
-//
-//        double[] eigenValues = eig.getRealEigenvalues();
-//        System.out.println(Arrays.toString(eigenValues));
-//
-//        double[][] eigenValuesDiagonalMatrix = new double[eigenValues.length][eigenValues.length];
-//        for (int i = 0; i < eigenValues.length; i++) {
-//            //eigenValuesDiagonalMatrix[i][i] = eigenValues[i];
-//            eigenValuesDiagonalMatrix[i][i] = Math.sqrt(1 / Math.max(EPS, eigenValues[i]));
-//        }
-//
-//        System.out.println(new Matrix(eigenValuesDiagonalMatrix));
-//
-//        double[][] eigenVectors = new double[numRows()][numRows()];
-//        for (int i = 0; i < numRows(); i++) {
-//            double[] eigenVector = eig.getEigenvector(i).toArray();
-//            if (eigenVector.length != numRows()) {
-//                throw new RuntimeException("expected eigenVector length of n");
-//            }
-//            if (numRows() >= 0) System.arraycopy(eigenVector, 0, eigenVectors[i], 0, numRows());
-//        }
-//
-//        Matrix UT = new Matrix(eigenVectors);
-//        Matrix U = UT.transpose();
-//        Matrix D = new Matrix(eigenValuesDiagonalMatrix);
-//
-//        return U.mult(D).mult(UT);
-//    }
 
     private RealMatrix toApacheMatrix() {
         return new Array2DRowRealMatrix(data);
@@ -165,7 +131,6 @@ public class Matrix {
                 sb.append(elem);
                 sb.append("\t");
             }
-            //sb.append(Arrays.toString(row));
             sb.append("\n");
         }
         return "Matrix{\n" + sb + "}\n";

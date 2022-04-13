@@ -104,16 +104,14 @@ public class Solver {
         return cplex.solve();
     }
 
-    public void printResults() throws IloException, FileNotFoundException {
+    public void printResults(PrintWriter out) throws IloException, FileNotFoundException {
         System.out.println("obj = " + cplex.getObjValue());
         for (int i = 0; i < vars_A.size(); i++) {
             System.out.println(varNameOf("a", i) + " = " + cplex.getValue(vars_A.get(i)));
         }
-        try (PrintWriter out = new PrintWriter("./graphics/p.txt")) {
-            for (int i = 0; i < vars_P.size(); i++) {
-                System.out.println(varNameOf("p", i) + " = " + cplex.getValue(vars_P.get(i)));
-                out.println(cplex.getValue(vars_P.get(i)));
-            }
+        for (int i = 0; i < vars_P.size(); i++) {
+            System.out.println(varNameOf("p", i) + " = " + cplex.getValue(vars_P.get(i)));
+            out.println(cplex.getValue(vars_P.get(i)));
         }
 //        for (int i = 0; i < vars_D.size(); i++) {
 //            System.out.println(varNameOf("d", i) + " = " + cplex.getValue(vars_D.get(i)));

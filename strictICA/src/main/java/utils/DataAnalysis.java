@@ -113,19 +113,19 @@ public class DataAnalysis {
         return matrix2.mult(matrix).div(N);
     }
 
-    public static Matrix pca(Matrix matrix, int R) {
+    public static Matrix pca(Matrix matrix, PrintWriter err, int R) {
         Matrix cov_matrix = getCovMatrix2(matrix);
 
-        Pair<double[], double[][]> decompose = cov_matrix.decomposition();
+        Pair<double[], double[][]> decompose = cov_matrix.decomposition(err);
 
-        System.out.println("# pca debug: ");
-        System.out.println(Arrays.toString(decompose.first));
+        err.println("# pca debug: ");
+        err.println(Arrays.toString(decompose.first));
         for (int i = 0; i < R; i++) {
-            System.out.println("# eigen " + i + ":");
-            System.out.println(decompose.first[i]);
-            System.out.println(Arrays.toString(decompose.second[i]));
+            err.println("# eigen " + i + ":");
+            err.println(decompose.first[i]);
+            err.println(Arrays.toString(decompose.second[i]));
         }
-        System.out.println();
+        err.println();
 
         double[][] newData = new double[matrix.numRows()][R];
 
