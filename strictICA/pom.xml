@@ -14,11 +14,11 @@
     </properties>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.ejml/ejml-all -->
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
         <dependency>
-            <groupId>org.ejml</groupId>
-            <artifactId>ejml-all</artifactId>
-            <version>0.41</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
         </dependency>
     </dependencies>
 
