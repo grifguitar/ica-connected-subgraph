@@ -1,10 +1,8 @@
-import graph.Edge;
 import graph.Graph;
 import io.GraphIO;
 import io.MatrixIO;
 import utils.DataAnalysis;
 import utils.Matrix;
-import utils.Pair;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -18,38 +16,24 @@ public class Main {
         try {
 
             Map<Integer, String> rev_map = new HashMap<>();
+            Map<String, Integer> map = new HashMap<>();
 
-            Pair<Matrix, Map<String, Integer>> pair = MatrixIO.read("./input_data/test_small_025.mtx", true, rev_map);
-
-            Matrix matrix = pair.first;
-            Map<String, Integer> map = pair.second;
+            Matrix matrix = MatrixIO.read("./input_data/test_small_025.mtx", true, rev_map, map);
 
             matrix = whitening(matrix);
 
             Graph graph = GraphIO.read("./input_data/test_small_025.graph", map);
 
-            System.out.println("$ size: " + graph.getEdges().size());
-            for (Edge edge : graph.getEdges()) {
-                System.out.println("$ " + rev_map.get(edge.getFrom().getNum()) + "\t" + rev_map.get(edge.getTo().getNum()));
-            }
-
             System.out.println(matrix);
 
-            Solver solver = new Solver(matrix);
+            Solver solver = new Solver(matrix, graph);
 
             if (solver.solve()) {
                 try (PrintWriter out = new PrintWriter("./graphics/p.txt")) {
                     solver.printResults(out);
                 }
 
-                Pair<Matrix, Map<String, Integer>> pair_ans = MatrixIO.read("./input_data/test_small_025.ans", true, null);
-                Matrix ans = pair_ans.first;
-
-                for (String s : map.keySet()) {
-                    if (!pair_ans.second.containsKey(s)) {
-                        throw new RuntimeException("not found: " + s + ", in answer file");
-                    }
-                }
+                Matrix ans = MatrixIO.read("./input_data/test_small_025.ans", true, null, null);
 
                 for (int w = 0; w < ans.numCols(); w++) {
                     try (PrintWriter out = new PrintWriter("./graphics/p_ans_" + w + ".txt")) {

@@ -1,21 +1,16 @@
 package io;
 
 import utils.Matrix;
-import utils.Pair;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static io.GraphIO.putAndGetId;
-
 public class MatrixIO {
-    public static Pair<Matrix, Map<String, Integer>> read(String f, boolean WITH_NAME, Map<Integer, String> rev_map) {
+    public static Matrix read(String f, boolean WITH_NAME, Map<Integer, String> rev_map, Map<String, Integer> map) {
         try {
             try (BufferedReader in = new BufferedReader(new FileReader(f, StandardCharsets.UTF_8))) {
-
-                Map<String, Integer> map = new HashMap<>();
 
                 List<List<Double>> matrixRaw = new ArrayList<>();
 
@@ -26,15 +21,20 @@ public class MatrixIO {
                     int startPos = 0;
 
                     if (WITH_NAME) {
-                        int id = putAndGetId(map, tokens[0]);
-                        if (rev_map != null) {
-                            if (!rev_map.containsKey(id)) {
-                                rev_map.put(id, tokens[0]);
-                            } else {
-                                String name = rev_map.get(id);
-                                if (!Objects.equals(name, tokens[0])) {
-                                    throw new RuntimeException("some different name with equals id");
+                        if (rev_map != null && map != null) {
+                            if (!map.containsKey(tokens[0])) {
+                                map.put(tokens[0], map.size());
+                                int id = map.get(tokens[0]);
+                                if (!rev_map.containsKey(id)) {
+                                    rev_map.put(id, tokens[0]);
+                                } else {
+                                    throw new RuntimeException("rev_map already contains key: " + tokens[0]);
                                 }
+                                if (matrixRaw.size() != id) {
+                                    throw new RuntimeException("raw matrix size != id");
+                                }
+                            } else {
+                                throw new RuntimeException("map already contains key: " + tokens[0]);
                             }
                         }
                         startPos = 1;
@@ -57,7 +57,7 @@ public class MatrixIO {
                     }
                 }
 
-                return new Pair<>(new Matrix(matrixData), map);
+                return new Matrix(matrixData);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

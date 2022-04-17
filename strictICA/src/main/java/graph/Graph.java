@@ -1,19 +1,20 @@
 package graph;
 
-import java.util.Map;
-import java.util.Set;
+import utils.Pair;
 
-public record Graph(Set<Edge> edges, Set<Node> nodes, Map<Node, Set<Edge>> g) {
+import java.util.List;
 
-    public Set<Edge> getEdges() {
-        return edges;
+public record Graph(List<List<Pair<Integer, Long>>> graph, List<Pair<Integer, Integer>> edgesList) {
+
+    public List<Pair<Integer, Integer>> getEdges() {
+        return edgesList;
     }
 
-    public Set<Edge> edgesOf(Node v) {
-        return g.get(v);
+    public List<Pair<Integer, Long>> edgesOf(int v) {
+        return graph.get(v);
     }
 
-    public Set<Node> getNodes() {
-        return nodes;
+    public int getNodesCount() {
+        return graph.size();
     }
 }

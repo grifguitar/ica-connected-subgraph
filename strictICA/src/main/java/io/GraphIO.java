@@ -1,8 +1,7 @@
 package io;
 
-import graph.Edge;
 import graph.Graph;
-import graph.Node;
+import utils.Pair;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,45 +12,26 @@ public class GraphIO {
     public static Graph read(String f, Map<String, Integer> map) throws IOException {
         Scanner scanner = new Scanner(new FileReader(f, StandardCharsets.UTF_8));
 
-        Set<Edge> edges = new HashSet<>();
-        Set<Node> nodes = new HashSet<>();
-        Map<Node, Set<Edge>> g = new HashMap<>();
+        List<List<Pair<Integer, Long>>> graph = new ArrayList<>();
+        List<Pair<Integer, Integer>> edgesList = new ArrayList<>();
 
-        for (Integer val : map.values()) {
-            nodes.add(new Node(val));
+        for (int i = 0; i < map.size(); i++) {
+            graph.add(new ArrayList<>());
         }
 
         while (scanner.hasNext()) {
+            int _from = map.get(scanner.next());
+            int _to = map.get(scanner.next());
 
-            Node left = new Node(map.get(scanner.next()));
-            Node right = new Node(map.get(scanner.next()));
+            long a = edgesList.size();
+            edgesList.add(new Pair<>(_from, _to));
+            long b = edgesList.size();
+            edgesList.add(new Pair<>(_to, _from));
 
-            Edge edge = new Edge(left, right);
-            edges.add(edge);
-
-            if (!g.containsKey(left)) {
-                Set<Edge> set = new HashSet<>();
-                set.add(edge);
-                g.put(left, set);
-            } else {
-                g.get(left).add(edge);
-            }
-
-            if (!g.containsKey(right)) {
-                Set<Edge> set = new HashSet<>();
-                set.add(edge);
-                g.put(right, set);
-            } else {
-                g.get(right).add(edge);
-            }
-
+            graph.get(_from).add(new Pair<>(_to, a));
+            graph.get(_to).add(new Pair<>(_from, b));
         }
 
-        return new Graph(edges, nodes, g);
-    }
-
-    public static int putAndGetId(Map<String, Integer> map, String label) {
-        map.putIfAbsent(label, map.size());
-        return map.get(label);
+        return new Graph(graph, edgesList);
     }
 }

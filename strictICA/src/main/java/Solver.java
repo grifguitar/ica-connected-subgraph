@@ -4,34 +4,46 @@ import ilog.cplex.*;
 import utils.Matrix;
 import utils.Pair;
 
-import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.*;
 
 public class Solver {
 
     // constants:
 
     private final static float INF = 1000;
-    private final static int TIME_LIMIT = 20;
+    //private static float N_INF = INF;
+    private final static int TIME_LIMIT = 100;
     private final static int L1NORM = 250;
 
     private final Matrix matrix;
+    private final Graph graph;
+
+    private final List<IloNumVar> r;
+    //private final List<IloNumVar> d;
+    private final List<IloNumVar> q;
+    private final List<IloNumVar> x;
+
 
     private final IloCplex cplex;
 
     private final List<IloNumVar> vars_A;
     private final List<IloNumVar> vars_P;
+
 //    private final List<IloNumVar> vars_D;
 //    private final List<IloNumVar> vars_E;
 //    private final List<IloNumVar> vars_alpha;
 //    private final List<IloNumVar> vars_beta;
 
-    public Solver(Matrix matrix) throws IloException {
+    public Solver(Matrix matrix, Graph graph) throws IloException {
         this.matrix = matrix;
+        this.graph = graph;
+
+        if (matrix.numRows() != graph.getNodesCount()) {
+            throw new RuntimeException("unexpected");
+        }
+
+        //N_INF = matrix.numRows();
 
         this.cplex = new IloCplex();
         this.cplex.setParam(IloCplex.Param.OptimalityTarget, IloCplex.OptimalityTarget.OptimalGlobal);
@@ -40,14 +52,21 @@ public class Solver {
 
         this.vars_A = new ArrayList<>();
         this.vars_P = new ArrayList<>();
+
 //        this.vars_D = new ArrayList<>();
 //        this.vars_E = new ArrayList<>();
 //        this.vars_alpha = new ArrayList<>();
 //        this.vars_beta = new ArrayList<>();
 
+        this.r = new ArrayList<>();
+        //this.d = new ArrayList<>();
+        this.q = new ArrayList<>();
+        this.x = new ArrayList<>();
+
         addVariables();
         addObjective();
         addConstraint();
+        addConnectivityConstraint();
     }
 
     private void addVariables() throws IloException {
@@ -57,6 +76,7 @@ public class Solver {
         for (int i = 0; i < matrix.numRows(); i++) {
             vars_P.add(cplex.numVar(-INF, INF, IloNumVarType.Float, varNameOf("p", i)));
         }
+
 //        for (int i = 0; i < matrix.numRows(); i++) {
 //            vars_D.add(cplex.numVar(0, INF, IloNumVarType.Float, varNameOf("d", i)));
 //        }
@@ -69,6 +89,16 @@ public class Solver {
 //        for (int i = 0; i < matrix.numRows(); i++) {
 //            vars_beta.add(cplex.numVar(0, 1, IloNumVarType.Int, varNameOf("beta", i)));
 //        }
+
+        for (int i = 0; i < graph.getNodesCount(); i++) {
+            //d.add(cplex.numVar(0, INF, IloNumVarType.Float, varNameOf("d", i)));
+            r.add(cplex.numVar(0, 1, IloNumVarType.Int, varNameOf("r", i)));
+            q.add(cplex.numVar(0, 1, IloNumVarType.Int, varNameOf("q", i)));
+        }
+
+        for (Pair<Integer, Integer> edge : graph.getEdges()) {
+            x.add(cplex.numVar(0, 1, IloNumVarType.Int, "x_" + edge.first + "_" + edge.second));
+        }
     }
 
     private void addObjective() throws IloException {
@@ -84,6 +114,7 @@ public class Solver {
             cplex.addEq(cplex.scalProd(matrix.getRow(i), toArray(vars_A)), vars_P.get(i));
             //cplex.addEq(cplex.scalProd(matrix.getRow(i), toArray(vars_A)), cplex.diff(vars_D.get(i), vars_E.get(i)));
         }
+
 //        for (int i = 0; i < matrix.numRows(); i++) {
 //            cplex.addEq(cplex.sum(vars_alpha.get(i), vars_beta.get(i)), 1);
 //        }
@@ -100,11 +131,109 @@ public class Solver {
         cplex.addEq(cplex.sum(l1normP), L1NORM);
     }
 
+    private void addConnectivityConstraint() throws IloException {
+        connectivity1();
+        connectivity3();
+        connectivity4();
+        //connectivity11();
+        //connectivity12_13();
+        //connectivity_new();
+    }
+
+    private void connectivity1() throws IloException {
+        IloNumVar[] r2 = new IloNumVar[graph.getNodesCount()];
+        for (int i = 0; i < graph.getNodesCount(); i++) {
+            r2[i] = r.get(i);
+        }
+        cplex.addEq(cplex.sum(r2), 1);
+    }
+
+    private void connectivity3() throws IloException {
+        for (int node = 0; node < graph.getNodesCount(); node++) {
+            IloNumVar[] x_from_node = new IloNumVar[graph.edgesOf(node).size()];
+            IloNumVar[] x_to_node = new IloNumVar[graph.edgesOf(node).size()];
+            int cnt = 0;
+            for (Pair<Integer, Long> edge : graph.edgesOf(node)) {
+                int num = edge.second.intValue();
+                if (num % 2 == 0) {
+                    x_from_node[cnt] = x.get(num);
+                    x_to_node[cnt] = x.get(num + 1);
+                } else {
+                    x_from_node[cnt] = x.get(num);
+                    x_to_node[cnt] = x.get(num - 1);
+                }
+                cnt++;
+            }
+            // x[from][to] + r[to] = q[to]
+            cplex.addEq(cplex.sum(cplex.sum(x_to_node), r.get(node)), q.get(node));
+            // x[from][to] <= inf * q[from]
+            cplex.addGe(cplex.prod(INF, q.get(node)), cplex.sum(x_from_node));
+        }
+    }
+
+    private void connectivity4() throws IloException {
+        for (int i = 0; i < graph.getEdges().size(); i += 2) {
+            cplex.addGe(1, cplex.sum(x.get(i), x.get(i + 1)));
+            Pair<Integer, Integer> edge = graph.getEdges().get(i);
+            cplex.addGe(q.get(edge.first), x.get(i));
+            cplex.addGe(q.get(edge.second), x.get(i));
+            cplex.addGe(q.get(edge.first), x.get(i + 1));
+            cplex.addGe(q.get(edge.second), x.get(i + 1));
+        }
+    }
+
+//    private void connectivity_new() throws IloException {
+//        for (int i = 0; i < graph.getEdges().size(); i++) {
+//            Pair<Integer, Integer> edge = graph.getEdges().get(i);
+//            int _from = edge.first;
+//            int _to = edge.second;
+//            // d[to] - d[from] >= x[i] - INF * (1 - x[i])
+//            cplex.addGe(
+//                    cplex.diff(d.get(_to), d.get(_from)),
+//                    cplex.diff(x.get(i), cplex.prod(INF, cplex.diff(1, x.get(i))))
+//            );
+//        }
+//    }
+
+//    private void connectivity11() throws IloException {
+//        for (Node node : graph.getNodes()) {
+//            cplex.addGe(
+//                    N_INF + 1,
+//                    cplex.sum(d.get(node), cplex.prod(N_INF, r.get(node)))
+//            );
+//        }
+//    }
+
+//    private void connectivity12_13() throws IloException {
+//        for (Edge edge : graph.getEdges()) {
+//            Node _from = edge.getFrom();
+//            Node _to = edge.getTo();
+//            //(12)
+//            cplex.addGe(
+//                    cplex.diff(cplex.sum(N_INF, d.get(_to)), d.get(_from)),
+//                    cplex.prod(N_INF + 1, x.get(edge).first)
+//            );
+//            cplex.addGe(
+//                    cplex.diff(cplex.sum(N_INF, d.get(_from)), d.get(_to)),
+//                    cplex.prod(N_INF + 1, x.get(edge).second)
+//            );
+//            //(13)
+//            cplex.addGe(
+//                    cplex.diff(cplex.sum(N_INF, d.get(_from)), d.get(_to)),
+//                    cplex.prod(N_INF - 1, x.get(edge).first)
+//            );
+//            cplex.addGe(
+//                    cplex.diff(cplex.sum(INF, d.get(_to)), d.get(_from)),
+//                    cplex.prod(N_INF - 1, x.get(edge).second)
+//            );
+//        }
+//    }
+
     public boolean solve() throws IloException {
         return cplex.solve();
     }
 
-    public void printResults(PrintWriter out) throws IloException, FileNotFoundException {
+    public void printResults(PrintWriter out) throws IloException {
         System.out.println("obj = " + cplex.getObjValue());
         for (int i = 0; i < vars_A.size(); i++) {
             System.out.println(varNameOf("a", i) + " = " + cplex.getValue(vars_A.get(i)));
