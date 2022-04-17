@@ -17,4 +17,12 @@ public record Graph(List<List<Pair<Integer, Long>>> graph, List<Pair<Integer, In
     public int getNodesCount() {
         return graph.size();
     }
+
+    public static int companionEdge(int num) {
+        if (num % 2 == 0) {
+            return num + 1;
+        } else {
+            return num - 1;
+        }
+    }
 }

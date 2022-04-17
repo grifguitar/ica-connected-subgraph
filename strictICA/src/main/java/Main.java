@@ -26,7 +26,7 @@ public class Main {
 
             System.out.println(matrix);
 
-            Solver solver = new Solver(matrix, graph);
+            SolverCallback solver = new SolverCallback(matrix, graph);
 
             if (solver.solve()) {
                 try (PrintWriter out = new PrintWriter("./graphics/p.txt")) {
@@ -46,6 +46,8 @@ public class Main {
             } else {
                 System.out.println("debug: results not found!");
             }
+
+            SolverCallback.out_debug.close();
 
         } catch (Exception e) {
             throw new RuntimeException(e);
