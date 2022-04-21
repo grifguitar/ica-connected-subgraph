@@ -1,11 +1,8 @@
 import graph.Graph;
-import ilog.concert.IloNumExpr;
 import utils.Matrix;
 import utils.Pair;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public record Solution(
         float L1NORM,
@@ -17,32 +14,11 @@ public record Solution(
         double[] alpha,
         double[] beta,
         double[] r,
-        double[] d,
+        //double[] d,
         double[] q,
         double[] x
 ) {
     private final static double EPS = 0.0001;
-    private final static double HALF = 0.5;
-
-    public double getObjValue() {
-        double ans = 0;
-
-        double[] squares = new double[a.length];
-        for (int i = 0; i < a.length; i++) {
-            squares[i] = a[i] * a[i];
-            ans += squares[i];
-        }
-        double[] q_prod = new double[f.length];
-        double[] r_prod = new double[f.length];
-        for (int i = 0; i < f.length; i++) {
-            q_prod[i] = f[i] - g[i];
-            r_prod[i] = q_prod[i] * r[i];
-            q_prod[i] = q_prod[i] * q[i] * (1.0 / (double) f.length);
-            ans += r_prod[i] + q_prod[i];
-        }
-
-        return ans;
-    }
 
     public boolean adapt() {
         double[] p = matrix.mult(new Matrix(a).transpose()).transpose().getRow(0);
@@ -86,88 +62,101 @@ public record Solution(
 
         double max_f = -1;
         int argmax_f = -1;
-        for (int i = 0; i < f.length; i++) {
-            if (f[i] >= max_f) {
-                max_f = f[i];
+        for (int i = 0; i < q.length; i++) {
+            if (q[i] >= max_f) {
+                max_f = q[i];
                 argmax_f = i;
             }
         }
 
         if (argmax_f == -1 || max_f == -1) {
-            throw new RuntimeException("not found max in f[] array");
+            throw new RuntimeException("not found max in q[] array");
         }
 
         int root_ind = argmax_f;
         for (int i = 0; i < graph.getNodesCount(); i++) r[i] = 0;
         r[root_ind] = 1;
 
-        List<Boolean> visited = new ArrayList<>();
-        List<Boolean> markedEdge = new ArrayList<>();
-        for (int i = 0; i < graph.getNodesCount(); i++) visited.add(false);
-        for (int i = 0; i < graph.getEdges().size(); i++) markedEdge.add(false);
+        MainSolver.out_debug.println(q[root_ind]);
 
-        dfs(root_ind, visited, null, markedEdge, 1);
-
-        int flag = 0;
-        for (int i = 0; i < graph.getNodesCount(); i++) if (visited.get(i)) flag++;
-        if (flag == 0) throw new RuntimeException("unexpected flag visited vertex");
-
-        flag = 0;
-        for (int i = 0; i < graph.getEdges().size(); i++) if (markedEdge.get(i)) flag++;
-        if (flag == 0) throw new RuntimeException("unexpected flag marked edges");
-
-        for (int i = 0; i < graph.getNodesCount(); i++) {
-            if (!visited.get(i)) {
-                r[i] = 0;
-                d[i] = 1;
-                q[i] = 0;
-            }
+        if (q[root_ind] < MainSolver.SMALL) {
+            return false;
         }
-        for (int i = 0; i < graph.getEdges().size(); i++) {
-            if (!markedEdge.get(i)) {
+
+        boolean[] visited = new boolean[graph.getNodesCount()];
+        boolean[] visitedEdge = new boolean[graph.getEdges().size()];
+
+        dfs(root_ind, visited, visitedEdge, false, null);
+
+        boolean[] visitedNew = new boolean[graph.getNodesCount()];
+
+        dfs(root_ind, visitedNew, visitedEdge, true, visited);
+
+        for (int i = 0; i < visited.length; i++)
+            if (!visited[i] && !visitedNew[i]) {
+                //q[i] = 0;
+                throw new RuntimeException("unexpected dfs 1");
+            }
+        for (int i = 0; i < visitedEdge.length; i++)
+            if (!visitedEdge[i]) {
                 x[i] = 0;
+                //throw new RuntimeException("unexpected dfs 2");
             }
-        }
 
         return true;
     }
 
-    private void dfs(int u, List<Boolean> vis, Integer parent_edge, List<Boolean> markEdge, int depth) {
-        vis.set(u, true);
-        q[u] = 1;
-        d[u] = depth;
-        List<Pair<Integer, Long>> neighbours = new ArrayList<>();
-        for (Pair<Integer, Long> edge : graph.edgesOf(u)) {
+    private void dfs(int u, boolean[] vis, boolean[] visEdge, boolean second, boolean[] oldVis) {
+        vis[u] = true;
+
+        List<Pair<Integer, Long>> neighbours = new ArrayList<>(graph.edgesOf(u));
+        neighbours.sort(Comparator.comparingDouble(x -> q[x.first]));
+        Collections.reverse(neighbours);
+
+        // check:
+        for (int i = 0; i < neighbours.size() - 1; i++) {
+            if (q[neighbours.get(i).first] < q[neighbours.get(i + 1).first]) {
+                throw new RuntimeException("unsorted neighbours");
+            }
+        }
+
+        for (Pair<Integer, Long> edge : neighbours) {
+            System.out.println(neighbours);
+
+            int to = edge.first;
             int num = edge.second.intValue();
             int back_num = Graph.companionEdge(num);
-            double forward_x = x[num];
-            double back_x = x[back_num];
-            Pair<Integer, Integer> backEdge = graph.getEdges().get(back_num);
-            if (backEdge.second != u) {
+
+            // check:
+            Pair<Integer, Integer> backE = graph.getEdges().get(back_num);
+            if (backE.second != u) {
                 throw new RuntimeException("unexpected back edge");
             }
-            if (back_x >= HALF || forward_x >= HALF) {
-                x[back_num] = 0;
-                x[num] = 1;
-                neighbours.add(edge);
+
+            if (!second) {
+
+                if (!vis[to] && (q[u] - q[to] >= MainSolver.SMALL)) {
+                    x[num] = 1;
+                    visEdge[num] = true;
+                    dfs(to, vis, visEdge, false, null);
+                } else {
+                    x[num] = 0;
+                    visEdge[num] = true;
+                }
+
             } else {
-                x[back_num] = 0;
-                x[num] = 0;
+
+                if (!vis[to]) {
+                    if (q[u] - q[to] < MainSolver.SMALL) {
+                        q[to] = Math.max(q[u] - MainSolver.SMALL, 0);
+                        x[num] = 1;
+                        visEdge[num] = true;
+                    }
+                    dfs(to, vis, visEdge, true, oldVis);
+                }
+
             }
-            markEdge.set(back_num, true);
-            markEdge.set(num, true);
-        }
-        if (parent_edge != null) {
-            if (graph.getEdges().get(parent_edge).second != u) {
-                throw new RuntimeException("unexpected parent edge");
-            }
-            x[parent_edge] = 1;
-            x[Graph.companionEdge(parent_edge)] = 0;
-        }
-        for (Pair<Integer, Long> v : neighbours) {
-            if (!vis.get(v.first) && q[v.first] >= HALF) {
-                dfs(v.first, vis, v.second.intValue(), markEdge, depth + 1);
-            }
+
         }
     }
 
@@ -196,7 +185,7 @@ public record Solution(
     public double[] getAllCopy() {
         int cnt = 0;
         int new_size = a.length + f.length + g.length + alpha.length + beta.length +
-                r.length + d.length + q.length + x.length;
+                r.length + /*d.length*/ +q.length + x.length;
         double[] res = new double[new_size];
         for (double y : a) res[cnt++] = y;
         for (double y : f) res[cnt++] = y;
@@ -204,7 +193,7 @@ public record Solution(
         for (double y : alpha) res[cnt++] = y;
         for (double y : beta) res[cnt++] = y;
         for (double y : r) res[cnt++] = y;
-        for (double y : d) res[cnt++] = y;
+        //for (double y : d) res[cnt++] = y;
         for (double y : q) res[cnt++] = y;
         for (double y : x) res[cnt++] = y;
         return res;
@@ -219,7 +208,7 @@ public record Solution(
                 "| alpha = " + Arrays.toString(alpha) + "\n" +
                 "| beta = " + Arrays.toString(beta) + "\n" +
                 "| r = " + Arrays.toString(r) + "\n" +
-                "| d = " + Arrays.toString(d) + "\n" +
+                //"| d = " + Arrays.toString(d) + "\n" +
                 "| q = " + Arrays.toString(q) + "\n" +
                 "| x = " + Arrays.toString(x) + "\n" +
                 "\n";

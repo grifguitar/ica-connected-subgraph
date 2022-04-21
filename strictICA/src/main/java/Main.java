@@ -3,6 +3,9 @@ import io.GraphIO;
 import io.MatrixIO;
 import utils.DataAnalysis;
 import utils.Matrix;
+import utils.Pair;
+import utils.ROC;
+import visual.DrawAPI;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -11,6 +14,17 @@ import java.util.*;
 public class Main {
     static final String F_DEBUG = "./logs/debug.txt";
     static final String F_OUT = "./logs/out.txt";
+
+//    public static void main(String[] args) {
+//        try (PrintWriter out = new PrintWriter("./graphics/p.txt")) {
+//            for (int i = 0; i < 250; i++) {
+//                out.println(0.0);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        drawing();
+//    }
 
     public static void main(String[] args) {
         try {
@@ -26,7 +40,7 @@ public class Main {
 
             System.out.println(matrix);
 
-            SolverCallback solver = new SolverCallback(matrix, graph);
+            MainSolver solver = new MainSolver(matrix, graph);
 
             if (solver.solve()) {
                 try (PrintWriter out = new PrintWriter("./graphics/p.txt")) {
@@ -47,7 +61,9 @@ public class Main {
                 System.out.println("debug: results not found!");
             }
 
-            SolverCallback.out_debug.close();
+            MainSolver.out_debug.close();
+
+            DrawAPI.run();
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -87,6 +103,29 @@ public class Main {
 
                 }
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void drawing(String name) {
+        try {
+            BufferedReader r = new BufferedReader(new FileReader("./graphics/p.txt", StandardCharsets.UTF_8));
+            BufferedReader r1 = new BufferedReader(new FileReader("./graphics/p_ans_0.txt", StandardCharsets.UTF_8));
+            BufferedReader r2 = new BufferedReader(new FileReader("./graphics/p_ans_1.txt", StandardCharsets.UTF_8));
+            BufferedReader r3 = new BufferedReader(new FileReader("./graphics/p_ans_2.txt", StandardCharsets.UTF_8));
+            BufferedReader r4 = new BufferedReader(new FileReader("./graphics/p_ans_3.txt", StandardCharsets.UTF_8));
+            Double[] p = r.lines().map(Double::parseDouble).toList().toArray(new Double[0]);
+            Boolean[] p1 = r1.lines().map(Double::parseDouble).map(x -> (x.intValue() == 1)).toList().toArray(new Boolean[0]);
+            Boolean[] p2 = r2.lines().map(Double::parseDouble).map(x -> (x.intValue() == 1)).toList().toArray(new Boolean[0]);
+            Boolean[] p3 = r3.lines().map(Double::parseDouble).map(x -> (x.intValue() == 1)).toList().toArray(new Boolean[0]);
+            Boolean[] p4 = r4.lines().map(Double::parseDouble).map(x -> (x.intValue() == 1)).toList().toArray(new Boolean[0]);
+            Map<String, Pair<List<Pair<Number, Number>>, String>> lines = new TreeMap<>();
+            lines.put("p-vs-0", ROC.getLine(p, p1));
+            lines.put("p-vs-1", ROC.getLine(p, p2));
+            lines.put("p-vs-2", ROC.getLine(p, p3));
+            lines.put("p-vs-3", ROC.getLine(p, p4));
+            ROC.draw(name, lines);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

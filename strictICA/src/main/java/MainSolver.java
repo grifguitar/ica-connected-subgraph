@@ -12,7 +12,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SolverCallback {
+public class MainSolver {
     //private final AtomicReference<Double> lower_bound = new AtomicReference<>((double) -INF);
 
     /**
@@ -33,7 +33,7 @@ public class SolverCallback {
     private final List<IloNumVar> _beta = new ArrayList<>();
 
     private final List<IloNumVar> _r = new ArrayList<>();
-    private final List<IloNumVar> _d = new ArrayList<>();
+    //private final List<IloNumVar> _d = new ArrayList<>();
     private final List<IloNumVar> _q = new ArrayList<>();
     private final List<IloNumVar> _x = new ArrayList<>();
 
@@ -45,8 +45,10 @@ public class SolverCallback {
     private final static float INF = 1000;
     private final static int TIME_LIMIT = 20;
     private final static float L1NORM = 250;
+    public final static double SMALL = 0.01;
 
     public static PrintWriter out_debug;
+    public static int gl_cnt = 0;
 
     static {
         try {
@@ -68,7 +70,7 @@ public class SolverCallback {
      * constructor:
      */
 
-    public SolverCallback(Matrix matrix, Graph graph) throws IloException {
+    public MainSolver(Matrix matrix, Graph graph) throws IloException {
         this.graph = graph;
         this.matrix = matrix;
 
@@ -113,7 +115,7 @@ public class SolverCallback {
         for (int i = 0; i < N; i++) {
             System.out.print(varNameOf("r", i) + " = " + cplex.getValue(_r.get(i)) + " ; ");
             System.out.print(varNameOf("q", i) + " = " + cplex.getValue(_q.get(i)) + " ; ");
-            System.out.print(varNameOf("d", i) + " = " + cplex.getValue(_d.get(i)));
+            //System.out.print(varNameOf("d", i) + " = " + cplex.getValue(_d.get(i)));
             System.out.println();
             //out.println(cplex.getValue(_f.get(i)) - cplex.getValue(_g.get(i)));
         }
@@ -133,9 +135,9 @@ public class SolverCallback {
             _alpha.add(cplex.numVar(0, 1, IloNumVarType.Int, varNameOf("alpha", i)));
             _beta.add(cplex.numVar(0, 1, IloNumVarType.Int, varNameOf("beta", i)));
 
-            _d.add(cplex.numVar(1, INF, IloNumVarType.Float, varNameOf("d", i)));
+            //_d.add(cplex.numVar(1, INF, IloNumVarType.Float, varNameOf("d", i)));
             _r.add(cplex.numVar(0, 1, IloNumVarType.Int, varNameOf("r", i)));
-            _q.add(cplex.numVar(0, 1, IloNumVarType.Int, varNameOf("q", i)));
+            _q.add(cplex.numVar(0, INF, IloNumVarType.Float, varNameOf("q", i)));
         }
         for (Pair<Integer, Integer> edge : graph.getEdges()) {
             _x.add(cplex.numVar(0, 1, IloNumVarType.Int, "x_" + edge.first + "_" + edge.second));
@@ -150,12 +152,24 @@ public class SolverCallback {
         IloNumExpr[] q_prod = new IloNumExpr[N];
         IloNumExpr[] r_prod = new IloNumExpr[N];
         for (int i = 0; i < N; i++) {
-            q_prod[i] = cplex.diff(_f.get(i), _g.get(i));
-            r_prod[i] = cplex.prod(q_prod[i], _r.get(i));
-            q_prod[i] = cplex.prod(cplex.prod(q_prod[i], _q.get(i)), 1.0 / (double) N);
+            q_prod[i] = cplex.prod(cplex.diff(_f.get(i), _q.get(i)), (double) 1 / (double) N);
+            q_prod[i] = cplex.prod(q_prod[i], q_prod[i]);
+            r_prod[i] = cplex.prod(cplex.prod(_f.get(i), _r.get(i)), INF);
         }
-        cplex.addMaximize(cplex.sum(cplex.sum(squares), cplex.sum(q_prod), cplex.sum(r_prod)));
-        //cplex.addMaximize(cplex.sum(squares));
+        cplex.addMaximize(cplex.diff(cplex.sum(cplex.sum(squares), cplex.sum(r_prod)), cplex.sum(q_prod)));
+    }
+
+    private static double calculateObjective(Solution sol) {
+        double objectVal = 0;
+        for (int i = 0; i < sol.a().length; i++) {
+            objectVal += (sol.a()[i] * sol.a()[i]);
+        }
+        for (int i = 0; i < sol.f().length; i++) {
+            double y = (sol.f()[i] - sol.q()[i]) / (double) sol.f().length;
+            objectVal -= (y * y);
+            objectVal += (sol.f()[i] * sol.r()[i] * INF);
+        }
+        return objectVal;
     }
 
     private void addConstraint() throws IloException {
@@ -199,9 +213,10 @@ public class SolverCallback {
                 cnt++;
             }
             // x[from][to] + r[to] = q[to]
-            cplex.addEq(cplex.sum(cplex.sum(x_to_node), _r.get(node)), _q.get(node));
+            // cplex.addEq(cplex.sum(cplex.sum(x_to_node), _r.get(node)), _q.get(node));
+            cplex.addEq(cplex.sum(cplex.sum(x_to_node), _r.get(node)), 1);
             // x[from][to] <= inf * q[from]
-            cplex.addGe(cplex.prod(INF, _q.get(node)), cplex.sum(x_from_node));
+            // cplex.addGe(cplex.prod(INF, _q.get(node)), cplex.sum(x_from_node));
         }
     }
 
@@ -209,32 +224,42 @@ public class SolverCallback {
         for (int i = 0; i < graph.getEdges().size(); i += 2) {
             cplex.addGe(1, cplex.sum(_x.get(i), _x.get(i + 1)));
             Pair<Integer, Integer> edge = graph.getEdges().get(i);
-            cplex.addGe(_q.get(edge.first), _x.get(i));
-            cplex.addGe(_q.get(edge.second), _x.get(i));
-            cplex.addGe(_q.get(edge.first), _x.get(i + 1));
-            cplex.addGe(_q.get(edge.second), _x.get(i + 1));
+            cplex.addGe(_q.get(edge.first), cplex.prod(_x.get(i), SMALL));
+            cplex.addGe(_q.get(edge.second), cplex.prod(_x.get(i), SMALL));
+            cplex.addGe(_q.get(edge.first), cplex.prod(_x.get(i + 1), SMALL));
+            cplex.addGe(_q.get(edge.second), cplex.prod(_x.get(i + 1), SMALL));
         }
     }
 
     private void connectivity_old() throws IloException {
-        for (int node = 0; node < graph.getNodesCount(); node++) {
-            cplex.addGe(
-                    INF + 1,
-                    cplex.sum(_d.get(node), cplex.prod(INF, _r.get(node)))
-            );
-        }
+//        for (int node = 0; node < graph.getNodesCount(); node++) {
+//            cplex.addGe(
+//                    INF + 1,
+//                    cplex.sum(_d.get(node), cplex.prod(INF, _r.get(node)))
+//            );
+//        }
+//        for (int i = 0; i < graph.getEdges().size(); i++) {
+//            Pair<Integer, Integer> edge = graph.getEdges().get(i);
+//            int _from = edge.first;
+//            int _to = edge.second;
+//            // INF + d[to] - d[from] >= (INF + 1) * x[i]
+//            cplex.addGe(
+//                    cplex.sum(INF, cplex.diff(_d.get(_to), _d.get(_from))),
+//                    cplex.prod(INF + 1, _x.get(i))
+//            );
+//            cplex.addGe(
+//                    cplex.sum(INF, cplex.diff(_d.get(_from), _d.get(_to))),
+//                    cplex.prod(INF - 1, _x.get(i))
+//            );
+//        }
         for (int i = 0; i < graph.getEdges().size(); i++) {
             Pair<Integer, Integer> edge = graph.getEdges().get(i);
             int _from = edge.first;
             int _to = edge.second;
-            // INF + d[to] - d[from] >= (INF + 1) * x[i]
+            // INF + q[from] - q[to] >= (INF) * x[i] + 0.1
             cplex.addGe(
-                    cplex.sum(INF, cplex.diff(_d.get(_to), _d.get(_from))),
-                    cplex.prod(INF + 1, _x.get(i))
-            );
-            cplex.addGe(
-                    cplex.sum(INF, cplex.diff(_d.get(_from), _d.get(_to))),
-                    cplex.prod(INF - 1, _x.get(i))
+                    cplex.sum(INF, cplex.diff(_q.get(_from), _q.get(_to))),
+                    cplex.sum(cplex.prod(INF, _x.get(i)), SMALL)
             );
         }
     }
@@ -247,7 +272,7 @@ public class SolverCallback {
     private IloNumVar[] getAllCopy() {
         int cnt = 0;
         int new_size = _a.size() + _f.size() + _g.size() + _alpha.size() + _beta.size() +
-                _r.size() + _d.size() + _q.size() + _x.size();
+                _r.size() + /*_d.size()*/ +_q.size() + _x.size();
         IloNumVar[] res = new IloNumVar[new_size];
         for (IloNumVar y : _a) res[cnt++] = y;
         for (IloNumVar y : _f) res[cnt++] = y;
@@ -255,7 +280,7 @@ public class SolverCallback {
         for (IloNumVar y : _alpha) res[cnt++] = y;
         for (IloNumVar y : _beta) res[cnt++] = y;
         for (IloNumVar y : _r) res[cnt++] = y;
-        for (IloNumVar y : _d) res[cnt++] = y;
+        //for (IloNumVar y : _d) res[cnt++] = y;
         for (IloNumVar y : _q) res[cnt++] = y;
         for (IloNumVar y : _x) res[cnt++] = y;
         return res;
@@ -267,7 +292,7 @@ public class SolverCallback {
             IloNumVar[] list_vars = getAllCopy();
 
             Solution sol = new Solution(
-                    SolverCallback.L1NORM,
+                    MainSolver.L1NORM,
                     matrix,
                     graph,
                     getValues(toArray(_a)),
@@ -276,7 +301,7 @@ public class SolverCallback {
                     getValues(toArray(_alpha)),
                     getValues(toArray(_beta)),
                     getValues(toArray(_r)),
-                    getValues(toArray(_d)),
+                    //getValues(toArray(_d)),
                     getValues(toArray(_q)),
                     getValues(toArray(_x))
             );
@@ -293,14 +318,21 @@ public class SolverCallback {
                 System.out.println("Adapt:");
                 System.out.println(sol);
                 System.out.println();
-                out_debug.println(stringSolution);
+                //out_debug.println(calculateObjective(sol) + ":");
+                out_debug.println(sol);
+                try (PrintWriter out_sol = new PrintWriter("./graphics/p.txt")) {
+                    for (int i = 0; i < sol.f().length; i++) {
+                        out_sol.println(sol.q()[i]);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Main.drawing("roc" + gl_cnt++);
             }
 
-            double[] list_values = sol.getAllCopy();
-
-            if (sol.getObjValue() > getIncumbentObjValue()) {
+            if (calculateObjective(sol) > getIncumbentObjValue()) {
                 //lower_bound.set(sol.getObjValue());
-                setSolution(list_vars, list_values);
+                setSolution(list_vars, sol.getAllCopy());
             }
         }
     }
