@@ -15,17 +15,6 @@ public class Main {
     static final String F_DEBUG = "./logs/debug.txt";
     static final String F_OUT = "./logs/out.txt";
 
-//    public static void main(String[] args) {
-//        try (PrintWriter out = new PrintWriter("./graphics/p.txt")) {
-//            for (int i = 0; i < 250; i++) {
-//                out.println(0.0);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        drawing();
-//    }
-
     public static void main(String[] args) {
         try {
 
@@ -40,7 +29,7 @@ public class Main {
 
             System.out.println(matrix);
 
-            MainSolver solver = new MainSolver(matrix, graph);
+            NewSolver solver = new NewSolver(matrix, graph);
 
             if (solver.solve()) {
                 try (PrintWriter out = new PrintWriter("./graphics/p.txt")) {
@@ -61,8 +50,7 @@ public class Main {
                 System.out.println("debug: results not found!");
             }
 
-            MainSolver.out_debug.close();
-
+            drawing("tmp");
             DrawAPI.run();
 
         } catch (Exception e) {

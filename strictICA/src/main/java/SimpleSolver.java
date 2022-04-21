@@ -10,11 +10,10 @@ public class SimpleSolver {
     // constants:
 
     private final static float INF = 1000;
-    private final static int TIME_LIMIT = 100;
+    private final static int TIME_LIMIT = 20;
     private final static int L1NORM = 250;
 
     private final Matrix matrix;
-
     private final IloCplex cplex;
 
     private final List<IloNumVar> vars_A;
@@ -75,7 +74,8 @@ public class SimpleSolver {
         }
         for (int i = 0; i < vars_P.size(); i++) {
             System.out.println(varNameOf("p", i) + " = " + cplex.getValue(vars_P.get(i)));
-            out.println(cplex.getValue(vars_P.get(i)));
+            double p0 = cplex.getValue(vars_P.get(i));
+            out.println(p0);
         }
     }
 
